@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
+import os
+from dj_database_url import parse as dburl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qai!53r!j3%z82bhc4%u58wh#i4)u1lr8$425xqkbtg_vkom0d'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -90,12 +93,25 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+USE_POSTGRES = config("USE_POSTGRES", default=False, cast=bool)
+
+if USE_POSTGRES:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': config("DATABASE_POSTGRES"),
+            'USER': config("USER_POSTGRES"),
+            'PASSWORD': config("PASSWORD_POSTGRES"),
+            'HOST': config("HOST_POSTGRES"),
+            'PORT': config("PORT_POSTGRES"),
+            "OPTIONS": {
+                "sslmode": "require",
+            },
+        }
     }
-}
+else:
+    default_dburl = "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
+    DATABASES = {"default": config("DATABASE_URL", default=default_dburl, cast=dburl)}
 
 
 # Password validation
