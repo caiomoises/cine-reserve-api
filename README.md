@@ -5,7 +5,7 @@ API RESTful para gerenciamento de cinema, permitindo:
 * Cadastro e autenticação de usuários
 * Listagem de filmes e sessões
 * Visualização de assentos em tempo real
-* Reserva temporária de assentos (Redis)
+* Reserva temporária de assentos com controle de concorrência (Redis)
 * Compra de ingressos
 * Consulta de tickets do usuário
 
@@ -16,7 +16,7 @@ API RESTful para gerenciamento de cinema, permitindo:
 * Python 3.12
 * Django
 * Django REST Framework
-* PostgreSQL (ou SQLite para dev)
+* PostgreSQL (ou SQLite para desenvolvimento)
 * Redis (controle de concorrência)
 * JWT (autenticação)
 * Poetry (gerenciamento de dependências)
@@ -47,6 +47,7 @@ cine-reserve-api/
 │
 ├── manage.py
 ├── pyproject.toml
+├── insomnia_collection.json
 └── README.md
 ```
 
@@ -87,7 +88,24 @@ poetry shell
 
 ---
 
-## 5️⃣ Rodar migrações
+## 5️⃣ Criar arquivo `.env`
+
+```
+SECRET_KEY=your-secret-key
+DEBUG=True
+
+DB_NAME=cine
+DB_USER=cine
+DB_PASSWORD=cine
+DB_HOST=localhost
+DB_PORT=5432
+
+REDIS_URL=redis://localhost:6379/0
+```
+
+---
+
+## 6️⃣ Rodar migrações
 
 ```
 python manage.py migrate
@@ -95,7 +113,7 @@ python manage.py migrate
 
 ---
 
-## 6️⃣ Criar superusuário
+## 7️⃣ Criar superusuário
 
 ```
 python manage.py createsuperuser
@@ -103,7 +121,7 @@ python manage.py createsuperuser
 
 ---
 
-## 7️⃣ Rodar o servidor
+## 8️⃣ Rodar o servidor
 
 ```
 python manage.py runserver
@@ -176,6 +194,38 @@ Authorization: Bearer SEU_TOKEN
 
 ---
 
+# 🔄 Fluxo da aplicação
+
+1. Usuário realiza login (JWT)
+2. Lista filmes disponíveis
+3. Seleciona uma sessão
+4. Visualiza assentos disponíveis (Seat Map)
+5. Reserva um assento (lock no Redis)
+6. Realiza checkout
+7. Ticket é gerado
+8. Consulta tickets em "My Tickets"
+
+---
+
+# ⚠️ Regras de negócio
+
+* Um assento não pode ser reservado por mais de um usuário simultaneamente
+* Reservas possuem tempo de expiração (TTL no Redis)
+* Apenas o usuário que reservou pode finalizar o checkout
+* Um assento comprado não pode ser reservado novamente
+
+---
+
+# 🧠 Decisões técnicas
+
+* Redis utilizado para controle de concorrência em tempo real
+* Locks distribuídos evitam conflito de reservas
+* Separação entre dados temporários (Redis) e persistentes (PostgreSQL)
+* JWT para autenticação stateless
+* Arquitetura modular separando regras de negócio em services
+
+---
+
 # 📡 Endpoints
 
 ---
@@ -209,60 +259,25 @@ GET /api/movies/
 
 ## 🎟️ 2. Sessões
 
-### Listar sessões de um filme
-
 ```
 GET /api/sessions/?movie_id=1
 ```
 
 ---
 
-## 🪑 3. Seat Map (assentos)
-
-### Ver status dos assentos
+## 🪑 3. Seat Map
 
 ```
 GET /api/sessions/{session_id}/seats/
 ```
 
-### Resposta
-
 ```json
 [
-  {
-    "seat_id": 1,
-    "number": "A1",
-    "status": "available"
-  },
-  {
-    "seat_id": 2,
-    "number": "A2",
-    "status": "reserved"
-  },
-  {
-    "seat_id": 3,
-    "number": "A3",
-    "status": "purchased"
-  }
+  { "seat_id": 1, "number": "A1", "status": "available" },
+  { "seat_id": 2, "number": "A2", "status": "reserved" },
+  { "seat_id": 3, "number": "A3", "status": "purchased" }
 ]
 ```
-
----
-
-# 🔒 Status dos assentos
-
-| Status    | Descrição                         |
-| --------- | --------------------------------- |
-| available | livre                             |
-| reserved  | reservado temporariamente (Redis) |
-| purchased | comprado (DB)                     |
-
----
-
-## 🧠 Como funciona
-
-* Redis controla reservas temporárias (10 minutos)
-* Banco controla compras definitivas
 
 ---
 
@@ -281,67 +296,7 @@ POST /api/reserve-seat/
 
 ---
 
-### Possíveis respostas
-
-✔ Sucesso:
-
-```json
-{
-  "message": "Seat reserved successfully"
-}
-```
-
-❌ Já reservado:
-
-```json
-{
-  "error": "Seat already reserved"
-}
-```
-
-❌ Já comprado:
-
-```json
-{
-  "error": "Seat already purchased"
-}
-```
-
----
-
-# 🔍 Debug Redis
-
-## Ver assentos reservados
-
-```
-redis-cli
-```
-
-```
-keys seat_lock:*
-```
-
----
-
-## Ver quem reservou
-
-```
-get seat_lock:1:10
-```
-
----
-
-## Tempo restante
-
-```
-ttl seat_lock:1:10
-```
-
----
-
-# 🎫 5. Checkout (gerar ticket)
-
-(Se implementado)
+## 🎫 5. Checkout
 
 ```
 POST /api/checkout/
@@ -349,11 +304,11 @@ POST /api/checkout/
 
 * Converte reserva em compra
 * Remove lock do Redis
-* Cria Ticket no banco
+* Gera ticket
 
 ---
 
-# 👤 6. Meus Tickets
+## 👤 6. My Tickets
 
 ```
 GET /api/my-tickets/
@@ -361,9 +316,54 @@ GET /api/my-tickets/
 
 ---
 
-# 🧪 Testes
+# 🔒 Status dos assentos
 
-Rodar testes:
+| Status    | Descrição                 |
+| --------- | ------------------------- |
+| available | Livre                     |
+| reserved  | Reservado (Redis)         |
+| purchased | Comprado (Banco de dados) |
+
+---
+
+# 🔍 Debug Redis
+
+```
+redis-cli
+keys seat_lock:*
+get seat_lock:1:10
+ttl seat_lock:1:10
+```
+
+---
+
+# 🧪 Testes com Insomnia
+
+O projeto inclui uma collection para facilitar os testes.
+
+## 📂 Arquivo
+
+```
+insomnia_collection.json
+```
+
+## 🚀 Como usar
+
+1. Abra o Insomnia
+2. Clique em "Import"
+3. Selecione o arquivo
+4. Execute as requisições na ordem:
+
+* Login
+* Movies
+* Reservation
+* Seat Map
+* Checkout
+* My Tickets
+
+---
+
+# 🧪 Testes automatizados
 
 ```
 python manage.py test
@@ -381,25 +381,25 @@ docker-compose up --build
 
 # 🔥 Funcionalidades implementadas
 
-✔ Autenticação JWT
-✔ CRUD de filmes
-✔ Sessões de cinema
-✔ Seat Map em tempo real
-✔ Lock de assentos com Redis
-✔ Prevenção de concorrência
-✔ Reserva com timeout
-✔ Geração de tickets
+* Autenticação JWT
+* CRUD de filmes
+* Sessões de cinema
+* Seat Map em tempo real
+* Lock de assentos com Redis
+* Prevenção de concorrência
+* Reserva com timeout
+* Checkout e geração de tickets
 
 ---
 
-# 🚀 Possíveis melhorias
+# 🚀 Melhorias futuras
 
 * Expiração automática com Celery
+* Reserva de múltiplos assentos
 * Rate limiting
 * Cache de sessões populares
 * CI/CD com GitHub Actions
-* Logs estruturados
-* Monitoramento
+* Deploy em cloud (AWS, Railway)
 
 ---
 
@@ -408,8 +408,8 @@ docker-compose up --build
 * RESTful API
 * Controle de concorrência distribuída
 * Cache com Redis
-* Separação de responsabilidades
 * Arquitetura escalável
+* Separação de responsabilidades
 
 ---
 
