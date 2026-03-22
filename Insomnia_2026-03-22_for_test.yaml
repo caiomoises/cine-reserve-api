@@ -1,0 +1,212 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: cine
+meta:
+  id: wrk_d4b24d38f84a47a2a7920498dd4ac37d
+  created: 1774196507034
+  modified: 1774196507034
+  description: ""
+collection:
+  - url: http://localhost:8000/movies/
+    name: 2- movie
+    meta:
+      id: req_f69487eadb8142318852cdd02d5cb453
+      created: 1774196515677
+      modified: 1774201241359
+      isPrivate: false
+      description: ""
+      sortKey: -1774196515677
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.4.0
+        description: ""
+        disabled: false
+      - name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjAxNTE0LCJpYXQiOjE3NzQyMDEyMTQsImp0aSI6ImJiOWI1MjhiNDRhZDQ3MDBhYTdiYzdjY2IwYWM4ZDkxIiwidXNlcl9pZCI6IjEifQ.FZDrp0dvTMZzS_Sla8KfAPLJ1KPxTez22SCfrftQGvM
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8000/api/token/
+    name: 1- Login
+    meta:
+      id: req_9f24a1c99b9e473a8b375e7aaa680863
+      created: 1774201019913
+      modified: 1774201560904
+      isPrivate: false
+      description: ""
+      sortKey: -1774201019913
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "email": "caio.moiises@gmail.com",
+          "password": "data1801"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.4.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8000/reserve-seat/
+    name: 3- Reservation
+    meta:
+      id: req_6b4e61564a954b6fa84788fddbbefc67
+      created: 1774201088308
+      modified: 1774201372942
+      isPrivate: false
+      description: ""
+      sortKey: -1774196515577
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"session_id": 1,
+        	"seat_id":1
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.4.0
+        description: ""
+        disabled: false
+      - name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjAxNTE0LCJpYXQiOjE3NzQyMDEyMTQsImp0aSI6ImJiOWI1MjhiNDRhZDQ3MDBhYTdiYzdjY2IwYWM4ZDkxIiwidXNlcl9pZCI6IjEifQ.FZDrp0dvTMZzS_Sla8KfAPLJ1KPxTez22SCfrftQGvM
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8000/sessions/2/seats/
+    name: 4- seat map
+    meta:
+      id: req_3f58a942d8dd47d5afaed481cf57e554
+      created: 1774201107871
+      modified: 1774201415205
+      isPrivate: false
+      description: ""
+      sortKey: -1774196515477
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.4.0
+        description: ""
+        disabled: false
+      - name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjAxNTE0LCJpYXQiOjE3NzQyMDEyMTQsImp0aSI6ImJiOWI1MjhiNDRhZDQ3MDBhYTdiYzdjY2IwYWM4ZDkxIiwidXNlcl9pZCI6IjEifQ.FZDrp0dvTMZzS_Sla8KfAPLJ1KPxTez22SCfrftQGvM
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8000/checkout/
+    name: 5- Checkout
+    meta:
+      id: req_5280609cfa7d47fcbe0446236f0fcabc
+      created: 1774201122976
+      modified: 1774201447381
+      isPrivate: false
+      description: ""
+      sortKey: -1774196515377
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"session_id": 1,
+        	"seat_id":1
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.4.0
+        description: ""
+        disabled: false
+      - name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjAxNTE0LCJpYXQiOjE3NzQyMDEyMTQsImp0aSI6ImJiOWI1MjhiNDRhZDQ3MDBhYTdiYzdjY2IwYWM4ZDkxIiwidXNlcl9pZCI6IjEifQ.FZDrp0dvTMZzS_Sla8KfAPLJ1KPxTez22SCfrftQGvM
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8000/my-tickets/
+    name: 6- My tickets
+    meta:
+      id: req_fc016a9231d844a88fda5acebfe466cc
+      created: 1774201143769
+      modified: 1774201472619
+      isPrivate: false
+      description: ""
+      sortKey: -1774196515277
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.4.0
+        description: ""
+        disabled: false
+      - name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjAxNTE0LCJpYXQiOjE3NzQyMDEyMTQsImp0aSI6ImJiOWI1MjhiNDRhZDQ3MDBhYTdiYzdjY2IwYWM4ZDkxIiwidXNlcl9pZCI6IjEifQ.FZDrp0dvTMZzS_Sla8KfAPLJ1KPxTez22SCfrftQGvM
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_f70f804df52929354cb2bb015593f2b62df2d61a
+    created: 1774196507038
+    modified: 1774196507038
+environments:
+  name: Base Environment
+  meta:
+    id: env_f70f804df52929354cb2bb015593f2b62df2d61a
+    created: 1774196507036
+    modified: 1774196507036
+    isPrivate: false
